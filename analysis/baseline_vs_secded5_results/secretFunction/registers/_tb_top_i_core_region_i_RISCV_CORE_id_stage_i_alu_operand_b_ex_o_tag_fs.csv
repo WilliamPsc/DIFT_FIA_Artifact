@@ -1,0 +1,7 @@
+register,use_case,configuration,fault_model,successes,total_simulations,success_rate_percent
+/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/alu_operand_b_ex_o_tag,secretFunction,Baseline,single_bitflip_spatial,131,1008,12.996032
+/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/alu_operand_b_ex_o_tag,secretFunction,Baseline,multi_bitflip_reg,1,16,6.250000
+/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/alu_operand_b_ex_o_tag,secretFunction,Baseline,multi_bitflip_reg_multi,165,2464,6.696429
+/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/alu_operand_b_ex_o_tag,secretFunction,SECDED Strategy 5,single_bitflip_spatial,0,2232,0.000000
+/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/alu_operand_b_ex_o_tag,secretFunction,SECDED Strategy 5,multi_bitflip_reg,0,16,0.000000
+/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/alu_operand_b_ex_o_tag,secretFunction,SECDED Strategy 5,multi_bitflip_reg_multi,7,9216,0.075955

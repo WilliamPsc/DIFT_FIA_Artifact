@@ -1,0 +1,13 @@
+register,use_case,protection,strategy,fault_model,successes,total_simulations,success_rate_percent
+store_dest_addr_ex_o_tag/hc_o,secretFunction,hamming,3,multi_bitflip_reg,1,32,3.125000
+store_dest_addr_ex_o_tag/hc_o,secretFunction,hamming,3,multi_bitflip_reg_multi,501,12544,3.993941
+store_dest_addr_ex_o_tag/hc_o,secretFunction,hamming,3,single_bitflip_spatial,3,3032,0.098945
+store_dest_addr_ex_o_tag/hc_o,secretFunction,hamming,4,multi_bitflip_reg,1,32,3.125000
+store_dest_addr_ex_o_tag/hc_o,secretFunction,hamming,4,multi_bitflip_reg_multi,561,14464,3.878595
+store_dest_addr_ex_o_tag/hc_o,secretFunction,hamming,4,single_bitflip_spatial,3,3624,0.082781
+store_dest_addr_ex_o_tag/hc_o,secretFunction,secded,3,multi_bitflip_reg,0,32,0.000000
+store_dest_addr_ex_o_tag/hc_o,secretFunction,secded,3,multi_bitflip_reg_multi,44,14080,0.312500
+store_dest_addr_ex_o_tag/hc_o,secretFunction,secded,3,single_bitflip_spatial,0,3416,0.000000
+store_dest_addr_ex_o_tag/hc_o,secretFunction,secded,4,multi_bitflip_reg,0,32,0.000000
+store_dest_addr_ex_o_tag/hc_o,secretFunction,secded,4,multi_bitflip_reg_multi,29,16896,0.171638
+store_dest_addr_ex_o_tag/hc_o,secretFunction,secded,4,single_bitflip_spatial,0,4232,0.000000

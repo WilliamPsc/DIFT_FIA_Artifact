@@ -1,0 +1,7 @@
+register,use_case,protection,strategy,fault_model,successes,total_simulations,success_rate_percent
+tcr_load_store/hc_o,buffer_overflow,hamming,4,multi_bitflip_reg,0,48,0.000000
+tcr_load_store/hc_o,buffer_overflow,hamming,4,multi_bitflip_reg_multi,78,21504,0.362723
+tcr_load_store/hc_o,buffer_overflow,hamming,4,single_bitflip_spatial,0,4068,0.000000
+tcr_load_store/hc_o,buffer_overflow,secded,4,multi_bitflip_reg,0,48,0.000000
+tcr_load_store/hc_o,buffer_overflow,secded,4,multi_bitflip_reg_multi,0,25152,0.000000
+tcr_load_store/hc_o,buffer_overflow,secded,4,single_bitflip_spatial,0,4752,0.000000

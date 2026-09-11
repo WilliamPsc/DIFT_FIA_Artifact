@@ -1,0 +1,4 @@
+register,use_case,protection,strategy,fault_model,successes,total_simulations,success_rate_percent
+lsu/sd_o,buffer_overflow,secded,2,multi_bitflip_reg,0,12,0.000000
+lsu/sd_o,buffer_overflow,secded,2,multi_bitflip_reg_multi,4,4272,0.093633
+lsu/sd_o,buffer_overflow,secded,2,single_bitflip_spatial,0,978,0.000000

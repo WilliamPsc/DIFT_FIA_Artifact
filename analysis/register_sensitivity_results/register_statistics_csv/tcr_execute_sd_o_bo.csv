@@ -1,0 +1,7 @@
+register,use_case,protection,strategy,fault_model,successes,total_simulations,success_rate_percent
+tcr_execute/sd_o,buffer_overflow,secded,4,multi_bitflip_reg,0,12,0.000000
+tcr_execute/sd_o,buffer_overflow,secded,4,multi_bitflip_reg_multi,5,6360,0.078616
+tcr_execute/sd_o,buffer_overflow,secded,4,single_bitflip_spatial,0,1590,0.000000
+tcr_execute/sd_o,buffer_overflow,secded,5,multi_bitflip_reg,0,12,0.000000
+tcr_execute/sd_o,buffer_overflow,secded,5,multi_bitflip_reg_multi,5,6912,0.072338
+tcr_execute/sd_o,buffer_overflow,secded,5,single_bitflip_spatial,0,1674,0.000000

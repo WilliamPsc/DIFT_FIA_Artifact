@@ -1,0 +1,13 @@
+register,use_case,protection,strategy,fault_model,successes,total_simulations,success_rate_percent
+tpr_q,secretFunction,hamming,1,single_bitflip_spatial,415,34688,1.196379
+tpr_q,secretFunction,hamming,2,single_bitflip_spatial,255,35968,0.708964
+tpr_q,secretFunction,hamming,3,single_bitflip_spatial,255,44672,0.570827
+tpr_q,secretFunction,hamming,4,single_bitflip_spatial,50,54144,0.092346
+tpr_q,secretFunction,hamming,5,single_bitflip_spatial,40,57472,0.069599
+tpr_q,secretFunction,secded,1,single_bitflip_spatial,0,35968,0.000000
+tpr_q,secretFunction,secded,2,single_bitflip_spatial,0,37760,0.000000
+tpr_q,secretFunction,secded,3,single_bitflip_spatial,0,50816,0.000000
+tpr_q,secretFunction,secded,4,single_bitflip_spatial,0,63872,0.000000
+tpr_q,secretFunction,secded,5,single_bitflip_spatial,0,67456,0.000000
+tpr_q,secretFunction,simple_parity,1,single_bitflip_spatial,305,29568,1.031521
+tpr_q,secretFunction,wop,1,single_bitflip_spatial,1758,28288,6.214649

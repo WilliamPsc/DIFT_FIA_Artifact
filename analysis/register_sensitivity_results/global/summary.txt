@@ -1,0 +1,5 @@
+Simulations analysed: 16447900
+Successful simulations: 115453
+Overall success rate: 0.701932%
+Distinct registers: 222
+Distinct register pairs: 16799

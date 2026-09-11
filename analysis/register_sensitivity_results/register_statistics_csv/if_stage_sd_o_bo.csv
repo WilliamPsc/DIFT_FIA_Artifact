@@ -1,0 +1,7 @@
+register,use_case,protection,strategy,fault_model,successes,total_simulations,success_rate_percent
+if_stage/sd_o,buffer_overflow,secded,2,multi_bitflip_reg,0,12,0.000000
+if_stage/sd_o,buffer_overflow,secded,2,multi_bitflip_reg_multi,5,4272,0.117041
+if_stage/sd_o,buffer_overflow,secded,2,single_bitflip_spatial,0,978,0.000000
+if_stage/sd_o,buffer_overflow,secded,5,multi_bitflip_reg,0,12,0.000000
+if_stage/sd_o,buffer_overflow,secded,5,multi_bitflip_reg_multi,1,6912,0.014468
+if_stage/sd_o,buffer_overflow,secded,5,single_bitflip_spatial,0,1674,0.000000

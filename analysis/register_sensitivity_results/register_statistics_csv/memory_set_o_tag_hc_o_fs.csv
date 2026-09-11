@@ -1,0 +1,13 @@
+register,use_case,protection,strategy,fault_model,successes,total_simulations,success_rate_percent
+memory_set_o_tag/hc_o,secretFunction,hamming,3,multi_bitflip_reg,0,32,0.000000
+memory_set_o_tag/hc_o,secretFunction,hamming,3,multi_bitflip_reg_multi,120,12544,0.956633
+memory_set_o_tag/hc_o,secretFunction,hamming,3,single_bitflip_spatial,0,3032,0.000000
+memory_set_o_tag/hc_o,secretFunction,hamming,4,multi_bitflip_reg,0,32,0.000000
+memory_set_o_tag/hc_o,secretFunction,hamming,4,multi_bitflip_reg_multi,120,14464,0.829646
+memory_set_o_tag/hc_o,secretFunction,hamming,4,single_bitflip_spatial,0,3624,0.000000
+memory_set_o_tag/hc_o,secretFunction,secded,3,multi_bitflip_reg,0,32,0.000000
+memory_set_o_tag/hc_o,secretFunction,secded,3,multi_bitflip_reg_multi,42,14080,0.298295
+memory_set_o_tag/hc_o,secretFunction,secded,3,single_bitflip_spatial,0,3416,0.000000
+memory_set_o_tag/hc_o,secretFunction,secded,4,multi_bitflip_reg,0,32,0.000000
+memory_set_o_tag/hc_o,secretFunction,secded,4,multi_bitflip_reg_multi,27,16896,0.159801
+memory_set_o_tag/hc_o,secretFunction,secded,4,single_bitflip_spatial,0,4232,0.000000

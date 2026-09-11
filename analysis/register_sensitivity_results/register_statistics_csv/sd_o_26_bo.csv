@@ -1,0 +1,4 @@
+register,use_case,protection,strategy,fault_model,successes,total_simulations,success_rate_percent
+sd_o_26,buffer_overflow,secded,1,multi_bitflip_reg,0,12,0.000000
+sd_o_26,buffer_overflow,secded,1,multi_bitflip_reg_multi,6,4080,0.147059
+sd_o_26,buffer_overflow,secded,1,single_bitflip_spatial,0,936,0.000000

@@ -1,0 +1,10 @@
+register,use_case,protection,strategy,fault_model,successes,total_simulations,success_rate_percent
+sd_o_5,secretFunction,secded,1,multi_bitflip_reg,0,16,0.000000
+sd_o_5,secretFunction,secded,1,multi_bitflip_reg_multi,37,5440,0.680147
+sd_o_5,secretFunction,secded,1,single_bitflip_spatial,0,1248,0.000000
+sd_o_5,secretFunction,secded,3,multi_bitflip_reg,0,16,0.000000
+sd_o_5,secretFunction,secded,3,multi_bitflip_reg_multi,29,7072,0.410068
+sd_o_5,secretFunction,secded,3,single_bitflip_spatial,0,1712,0.000000
+sd_o_5,secretFunction,secded,4,multi_bitflip_reg,0,16,0.000000
+sd_o_5,secretFunction,secded,4,multi_bitflip_reg_multi,19,8480,0.224057
+sd_o_5,secretFunction,secded,4,single_bitflip_spatial,0,2120,0.000000

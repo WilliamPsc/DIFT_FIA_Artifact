@@ -1,0 +1,4 @@
+register,use_case,protection,strategy,fault_model,successes,total_simulations,success_rate_percent
+tpr_load_store_mode/sd_o,secretFunction,secded,4,multi_bitflip_reg,0,16,0.000000
+tpr_load_store_mode/sd_o,secretFunction,secded,4,multi_bitflip_reg_multi,23,8480,0.271226
+tpr_load_store_mode/sd_o,secretFunction,secded,4,single_bitflip_spatial,0,2120,0.000000

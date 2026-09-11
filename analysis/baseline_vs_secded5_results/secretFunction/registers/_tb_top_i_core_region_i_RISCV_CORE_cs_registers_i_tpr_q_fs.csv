@@ -1,0 +1,3 @@
+register,use_case,configuration,fault_model,successes,total_simulations,success_rate_percent
+/tb/top_i/core_region_i/RISCV_CORE/cs_registers_i/tpr_q,secretFunction,Baseline,single_bitflip_spatial,1758,28288,6.214649
+/tb/top_i/core_region_i/RISCV_CORE/cs_registers_i/tpr_q,secretFunction,SECDED Strategy 5,single_bitflip_spatial,0,67456,0.000000

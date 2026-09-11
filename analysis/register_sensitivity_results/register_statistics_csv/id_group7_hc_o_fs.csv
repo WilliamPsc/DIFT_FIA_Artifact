@@ -1,0 +1,7 @@
+register,use_case,protection,strategy,fault_model,successes,total_simulations,success_rate_percent
+id_group7/hc_o,secretFunction,hamming,5,multi_bitflip_reg,0,64,0.000000
+id_group7/hc_o,secretFunction,hamming,5,multi_bitflip_reg_multi,226,31488,0.717734
+id_group7/hc_o,secretFunction,hamming,5,single_bitflip_spatial,0,5736,0.000000
+id_group7/hc_o,secretFunction,secded,5,multi_bitflip_reg,0,64,0.000000
+id_group7/hc_o,secretFunction,secded,5,multi_bitflip_reg_multi,10,36480,0.027412
+id_group7/hc_o,secretFunction,secded,5,single_bitflip_spatial,0,6672,0.000000

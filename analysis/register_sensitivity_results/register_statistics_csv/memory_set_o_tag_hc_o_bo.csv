@@ -1,0 +1,13 @@
+register,use_case,protection,strategy,fault_model,successes,total_simulations,success_rate_percent
+memory_set_o_tag/hc_o,buffer_overflow,hamming,3,multi_bitflip_reg,1,24,4.166667
+memory_set_o_tag/hc_o,buffer_overflow,hamming,3,multi_bitflip_reg_multi,427,9408,4.538690
+memory_set_o_tag/hc_o,buffer_overflow,hamming,3,single_bitflip_spatial,3,2274,0.131926
+memory_set_o_tag/hc_o,buffer_overflow,hamming,4,multi_bitflip_reg,1,24,4.166667
+memory_set_o_tag/hc_o,buffer_overflow,hamming,4,multi_bitflip_reg_multi,487,10848,4.489307
+memory_set_o_tag/hc_o,buffer_overflow,hamming,4,single_bitflip_spatial,3,2718,0.110375
+memory_set_o_tag/hc_o,buffer_overflow,secded,3,multi_bitflip_reg,0,24,0.000000
+memory_set_o_tag/hc_o,buffer_overflow,secded,3,multi_bitflip_reg_multi,8,10560,0.075758
+memory_set_o_tag/hc_o,buffer_overflow,secded,3,single_bitflip_spatial,0,2562,0.000000
+memory_set_o_tag/hc_o,buffer_overflow,secded,4,multi_bitflip_reg,0,24,0.000000
+memory_set_o_tag/hc_o,buffer_overflow,secded,4,multi_bitflip_reg_multi,2,12672,0.015783
+memory_set_o_tag/hc_o,buffer_overflow,secded,4,single_bitflip_spatial,0,3174,0.000000

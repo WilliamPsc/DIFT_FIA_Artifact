@@ -1,0 +1,7 @@
+register,use_case,protection,strategy,fault_model,successes,total_simulations,success_rate_percent
+id_group9/hc_o,buffer_overflow,hamming,5,multi_bitflip_reg,1,24,4.166667
+id_group9/hc_o,buffer_overflow,hamming,5,multi_bitflip_reg_multi,531,11904,4.460685
+id_group9/hc_o,buffer_overflow,hamming,5,single_bitflip_spatial,3,2874,0.104384
+id_group9/hc_o,buffer_overflow,secded,5,multi_bitflip_reg,0,24,0.000000
+id_group9/hc_o,buffer_overflow,secded,5,multi_bitflip_reg_multi,2,13776,0.014518
+id_group9/hc_o,buffer_overflow,secded,5,single_bitflip_spatial,0,3342,0.000000

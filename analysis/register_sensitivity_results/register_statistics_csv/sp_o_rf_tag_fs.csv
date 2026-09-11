@@ -1,0 +1,4 @@
+register,use_case,protection,strategy,fault_model,successes,total_simulations,success_rate_percent
+sp_o_rf_tag,secretFunction,simple_parity,1,multi_bitflip_reg,0,16,0.000000
+sp_o_rf_tag,secretFunction,simple_parity,1,multi_bitflip_reg_multi,4,2624,0.152439
+sp_o_rf_tag,secretFunction,simple_parity,1,single_bitflip_spatial,2,1048,0.190840

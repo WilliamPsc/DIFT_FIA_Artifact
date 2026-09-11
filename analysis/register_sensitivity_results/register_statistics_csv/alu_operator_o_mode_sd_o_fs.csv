@@ -1,0 +1,7 @@
+register,use_case,protection,strategy,fault_model,successes,total_simulations,success_rate_percent
+alu_operator_o_mode/sd_o,secretFunction,secded,3,multi_bitflip_reg,0,16,0.000000
+alu_operator_o_mode/sd_o,secretFunction,secded,3,multi_bitflip_reg_multi,34,7072,0.480769
+alu_operator_o_mode/sd_o,secretFunction,secded,3,single_bitflip_spatial,0,1712,0.000000
+alu_operator_o_mode/sd_o,secretFunction,secded,4,multi_bitflip_reg,0,16,0.000000
+alu_operator_o_mode/sd_o,secretFunction,secded,4,multi_bitflip_reg_multi,24,8480,0.283019
+alu_operator_o_mode/sd_o,secretFunction,secded,4,single_bitflip_spatial,0,2120,0.000000

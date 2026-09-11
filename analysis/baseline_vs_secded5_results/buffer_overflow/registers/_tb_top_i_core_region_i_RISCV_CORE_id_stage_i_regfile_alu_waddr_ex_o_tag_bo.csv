@@ -1,0 +1,7 @@
+register,use_case,configuration,fault_model,successes,total_simulations,success_rate_percent
+/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/regfile_alu_waddr_ex_o_tag,buffer_overflow,Baseline,single_bitflip_spatial,58,3720,1.559140
+/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/regfile_alu_waddr_ex_o_tag,buffer_overflow,Baseline,multi_bitflip_reg,0,192,0.000000
+/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/regfile_alu_waddr_ex_o_tag,buffer_overflow,Baseline,multi_bitflip_reg_multi,96,23808,0.403226
+/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/regfile_alu_waddr_ex_o_tag,buffer_overflow,SECDED Strategy 5,single_bitflip_spatial,0,8310,0.000000
+/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/regfile_alu_waddr_ex_o_tag,buffer_overflow,SECDED Strategy 5,multi_bitflip_reg,0,192,0.000000
+/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/regfile_alu_waddr_ex_o_tag,buffer_overflow,SECDED Strategy 5,multi_bitflip_reg_multi,0,104832,0.000000

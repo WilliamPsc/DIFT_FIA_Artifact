@@ -1,0 +1,13 @@
+register,use_case,protection,strategy,fault_model,successes,total_simulations,success_rate_percent
+rdata_offset_q_tag/hc_o,buffer_overflow,hamming,3,multi_bitflip_reg,0,48,0.000000
+rdata_offset_q_tag/hc_o,buffer_overflow,hamming,3,multi_bitflip_reg_multi,96,18624,0.515464
+rdata_offset_q_tag/hc_o,buffer_overflow,hamming,3,single_bitflip_spatial,0,3402,0.000000
+rdata_offset_q_tag/hc_o,buffer_overflow,hamming,4,multi_bitflip_reg,0,48,0.000000
+rdata_offset_q_tag/hc_o,buffer_overflow,hamming,4,multi_bitflip_reg_multi,96,21504,0.446429
+rdata_offset_q_tag/hc_o,buffer_overflow,hamming,4,single_bitflip_spatial,0,4068,0.000000
+rdata_offset_q_tag/hc_o,buffer_overflow,secded,3,multi_bitflip_reg,0,48,0.000000
+rdata_offset_q_tag/hc_o,buffer_overflow,secded,3,multi_bitflip_reg_multi,10,20928,0.047783
+rdata_offset_q_tag/hc_o,buffer_overflow,secded,3,single_bitflip_spatial,0,3834,0.000000
+rdata_offset_q_tag/hc_o,buffer_overflow,secded,4,multi_bitflip_reg,0,48,0.000000
+rdata_offset_q_tag/hc_o,buffer_overflow,secded,4,multi_bitflip_reg_multi,0,25152,0.000000
+rdata_offset_q_tag/hc_o,buffer_overflow,secded,4,single_bitflip_spatial,0,4752,0.000000

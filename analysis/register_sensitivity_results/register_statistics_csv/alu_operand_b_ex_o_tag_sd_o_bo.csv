@@ -1,0 +1,7 @@
+register,use_case,protection,strategy,fault_model,successes,total_simulations,success_rate_percent
+alu_operand_b_ex_o_tag/sd_o,buffer_overflow,secded,3,multi_bitflip_reg,0,12,0.000000
+alu_operand_b_ex_o_tag/sd_o,buffer_overflow,secded,3,multi_bitflip_reg_multi,4,5304,0.075415
+alu_operand_b_ex_o_tag/sd_o,buffer_overflow,secded,3,single_bitflip_spatial,0,1284,0.000000
+alu_operand_b_ex_o_tag/sd_o,buffer_overflow,secded,4,multi_bitflip_reg,0,12,0.000000
+alu_operand_b_ex_o_tag/sd_o,buffer_overflow,secded,4,multi_bitflip_reg_multi,0,6360,0.000000
+alu_operand_b_ex_o_tag/sd_o,buffer_overflow,secded,4,single_bitflip_spatial,0,1590,0.000000

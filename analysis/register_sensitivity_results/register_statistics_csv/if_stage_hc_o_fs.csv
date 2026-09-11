@@ -1,0 +1,13 @@
+register,use_case,protection,strategy,fault_model,successes,total_simulations,success_rate_percent
+if_stage/hc_o,secretFunction,hamming,2,multi_bitflip_reg,0,64,0.000000
+if_stage/hc_o,secretFunction,hamming,2,multi_bitflip_reg_multi,198,21504,0.920759
+if_stage/hc_o,secretFunction,hamming,2,single_bitflip_spatial,0,3720,0.000000
+if_stage/hc_o,secretFunction,hamming,5,multi_bitflip_reg,0,64,0.000000
+if_stage/hc_o,secretFunction,hamming,5,multi_bitflip_reg_multi,174,31488,0.552591
+if_stage/hc_o,secretFunction,hamming,5,single_bitflip_spatial,0,5736,0.000000
+if_stage/hc_o,secretFunction,secded,2,multi_bitflip_reg,0,64,0.000000
+if_stage/hc_o,secretFunction,secded,2,multi_bitflip_reg_multi,90,22400,0.401786
+if_stage/hc_o,secretFunction,secded,2,single_bitflip_spatial,0,3888,0.000000
+if_stage/hc_o,secretFunction,secded,5,multi_bitflip_reg,0,64,0.000000
+if_stage/hc_o,secretFunction,secded,5,multi_bitflip_reg_multi,10,36480,0.027412
+if_stage/hc_o,secretFunction,secded,5,single_bitflip_spatial,0,6672,0.000000

@@ -1,0 +1,10 @@
+register,use_case,protection,strategy,fault_model,successes,total_simulations,success_rate_percent
+tcr/sd_o_32,secretFunction,secded,1,multi_bitflip_reg,0,16,0.000000
+tcr/sd_o_32,secretFunction,secded,1,multi_bitflip_reg_multi,29,5440,0.533088
+tcr/sd_o_32,secretFunction,secded,1,single_bitflip_spatial,0,1248,0.000000
+tcr/sd_o_32,secretFunction,secded,2,multi_bitflip_reg,0,16,0.000000
+tcr/sd_o_32,secretFunction,secded,2,multi_bitflip_reg_multi,29,5696,0.509129
+tcr/sd_o_32,secretFunction,secded,2,single_bitflip_spatial,0,1304,0.000000
+tcr/sd_o_32,secretFunction,secded,3,multi_bitflip_reg,0,16,0.000000
+tcr/sd_o_32,secretFunction,secded,3,multi_bitflip_reg_multi,21,7072,0.296946
+tcr/sd_o_32,secretFunction,secded,3,single_bitflip_spatial,0,1712,0.000000

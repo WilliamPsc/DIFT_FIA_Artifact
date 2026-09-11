@@ -1,0 +1,4 @@
+register,use_case,protection,strategy,fault_model,successes,total_simulations,success_rate_percent
+sp_o_32,buffer_overflow,simple_parity,1,multi_bitflip_reg,0,24,0.000000
+sp_o_32,buffer_overflow,simple_parity,1,multi_bitflip_reg_multi,0,3912,0.000000
+sp_o_32,buffer_overflow,simple_parity,1,single_bitflip_spatial,6,1566,0.383142

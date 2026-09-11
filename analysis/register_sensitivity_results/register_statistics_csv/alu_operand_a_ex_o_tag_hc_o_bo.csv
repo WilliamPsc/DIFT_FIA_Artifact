@@ -1,0 +1,13 @@
+register,use_case,protection,strategy,fault_model,successes,total_simulations,success_rate_percent
+alu_operand_a_ex_o_tag/hc_o,buffer_overflow,hamming,3,multi_bitflip_reg,0,24,0.000000
+alu_operand_a_ex_o_tag/hc_o,buffer_overflow,hamming,3,multi_bitflip_reg_multi,37,9408,0.393282
+alu_operand_a_ex_o_tag/hc_o,buffer_overflow,hamming,3,single_bitflip_spatial,0,2274,0.000000
+alu_operand_a_ex_o_tag/hc_o,buffer_overflow,hamming,4,multi_bitflip_reg,0,24,0.000000
+alu_operand_a_ex_o_tag/hc_o,buffer_overflow,hamming,4,multi_bitflip_reg_multi,37,10848,0.341077
+alu_operand_a_ex_o_tag/hc_o,buffer_overflow,hamming,4,single_bitflip_spatial,0,2718,0.000000
+alu_operand_a_ex_o_tag/hc_o,buffer_overflow,secded,3,multi_bitflip_reg,0,24,0.000000
+alu_operand_a_ex_o_tag/hc_o,buffer_overflow,secded,3,multi_bitflip_reg_multi,6,10560,0.056818
+alu_operand_a_ex_o_tag/hc_o,buffer_overflow,secded,3,single_bitflip_spatial,0,2562,0.000000
+alu_operand_a_ex_o_tag/hc_o,buffer_overflow,secded,4,multi_bitflip_reg,0,24,0.000000
+alu_operand_a_ex_o_tag/hc_o,buffer_overflow,secded,4,multi_bitflip_reg_multi,0,12672,0.000000
+alu_operand_a_ex_o_tag/hc_o,buffer_overflow,secded,4,single_bitflip_spatial,0,3174,0.000000

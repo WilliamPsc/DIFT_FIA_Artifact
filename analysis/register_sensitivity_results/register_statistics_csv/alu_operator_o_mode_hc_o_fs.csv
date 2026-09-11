@@ -1,0 +1,13 @@
+register,use_case,protection,strategy,fault_model,successes,total_simulations,success_rate_percent
+alu_operator_o_mode/hc_o,secretFunction,hamming,3,multi_bitflip_reg,4,64,6.250000
+alu_operator_o_mode/hc_o,secretFunction,hamming,3,multi_bitflip_reg_multi,1735,24832,6.986952
+alu_operator_o_mode/hc_o,secretFunction,hamming,3,single_bitflip_spatial,16,4536,0.352734
+alu_operator_o_mode/hc_o,secretFunction,hamming,4,multi_bitflip_reg,4,64,6.250000
+alu_operator_o_mode/hc_o,secretFunction,hamming,4,multi_bitflip_reg_multi,1975,28672,6.888253
+alu_operator_o_mode/hc_o,secretFunction,hamming,4,single_bitflip_spatial,16,5424,0.294985
+alu_operator_o_mode/hc_o,secretFunction,secded,3,multi_bitflip_reg,0,64,0.000000
+alu_operator_o_mode/hc_o,secretFunction,secded,3,multi_bitflip_reg_multi,96,27904,0.344037
+alu_operator_o_mode/hc_o,secretFunction,secded,3,single_bitflip_spatial,0,5112,0.000000
+alu_operator_o_mode/hc_o,secretFunction,secded,4,multi_bitflip_reg,0,64,0.000000
+alu_operator_o_mode/hc_o,secretFunction,secded,4,multi_bitflip_reg_multi,71,33536,0.211713
+alu_operator_o_mode/hc_o,secretFunction,secded,4,single_bitflip_spatial,0,6336,0.000000

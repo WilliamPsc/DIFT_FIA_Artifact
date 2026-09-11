@@ -1,0 +1,7 @@
+register,use_case,protection,strategy,fault_model,successes,total_simulations,success_rate_percent
+tcr_load_store/hc_o,secretFunction,hamming,4,multi_bitflip_reg,7,64,10.937500
+tcr_load_store/hc_o,secretFunction,hamming,4,multi_bitflip_reg_multi,3240,28672,11.300223
+tcr_load_store/hc_o,secretFunction,hamming,4,single_bitflip_spatial,22,5424,0.405605
+tcr_load_store/hc_o,secretFunction,secded,4,multi_bitflip_reg,7,64,10.937500
+tcr_load_store/hc_o,secretFunction,secded,4,multi_bitflip_reg_multi,2724,33536,8.122615
+tcr_load_store/hc_o,secretFunction,secded,4,single_bitflip_spatial,0,6336,0.000000

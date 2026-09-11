@@ -1,0 +1,112 @@
+{
+    "name_simulator": "modelsim",
+    "path_tcl_generation": "/home/pensec/Documents/Github/FISSA/",
+    "path_files_sim": "/home/pensec/Documents/Github/FISSA/simu_files/",
+    "path_generated_sim": "/home/pensec/Documents/Github/FISSA/simu_files/generated_simulations/",
+    "path_results_sim": "/home/pensec/Documents/Github/FISSA/simu_files/results_simulations/",
+    "work_env": "/home/pensec/Documents/Divers/sharedFolder",
+    "path_simulation": [
+        "/home/william/Documents/DRiSCY/pulpino/sw/build/apps/",
+        "__code",
+        "/CMakeFiles/",
+        "__code",
+        ".vsimc.dir/",
+        "__code"
+    ],
+    "prot": "simple_parity",
+    "version": 1,
+    "name_reg_file_ext_wo_protect": "/faulted-reg.yaml",
+    "codes": [
+        "buffer_overflow",
+        "secretFunction"
+    ],
+    "name_results": {
+        "buffer_overflow": "Buffer Overflow",
+        "secretFunction": "WU-FTPd"
+    },
+    "threat_model": [
+        "single_bitflip_spatial",
+        "multi_bitflip_reg",
+        "multi_bitflip_reg_multi"
+    ],
+    "multi_fault_injection": 2,
+    "avoid_register": [
+        "/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/illegal_insn_dec_dift",
+        "/tb/top_i/core_region_i/RISCV_CORE/if_stage_i/instr_rdata_id_o",
+        "/tb/top_i/core_region_i/RISCV_CORE/if_stage_i/pc_id_o"
+    ],
+    "avoid_log_registers": [
+        "/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/rf_reg",
+        "/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/rf_reg[0]",
+        "/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/rf_reg[1]",
+        "/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/rf_reg[2]",
+        "/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/rf_reg[3]",
+        "/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/rf_reg[4]",
+        "/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/rf_reg[5]",
+        "/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/rf_reg[6]",
+        "/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/rf_reg[7]",
+        "/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/rf_reg[8]",
+        "/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/rf_reg[9]",
+        "/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/rf_reg[10]",
+        "/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/rf_reg[11]",
+        "/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/rf_reg[12]",
+        "/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/rf_reg[13]",
+        "/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/rf_reg[14]",
+        "/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/rf_reg[15]",
+        "/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/rf_reg[16]",
+        "/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/rf_reg[17]",
+        "/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/rf_reg[18]",
+        "/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/rf_reg[19]",
+        "/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/rf_reg[20]",
+        "/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/rf_reg[21]",
+        "/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/rf_reg[22]",
+        "/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/rf_reg[23]",
+        "/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/rf_reg[24]",
+        "/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/rf_reg[25]",
+        "/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/rf_reg[26]",
+        "/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/rf_reg[27]",
+        "/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/rf_reg[28]",
+        "/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/rf_reg[29]",
+        "/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/rf_reg[30]",
+        "/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/rf_reg[31]"
+    ],
+    "log_registers": [
+        "/tb/top_i/core_region_i/RISCV_CORE/cs_registers_i/simple_parity_decoder_tcr/error_o_csr",
+        "/tb/top_i/core_region_i/RISCV_CORE/cs_registers_i/simple_parity_decoder_tpr/error_o_csr",
+        "/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/simple_parity_decoder_addr_rf_tag/error_o_addr_rf_tag",
+        "/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/simple_parity_decoder_26/error_o_26",
+        "/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/simple_parity_decoder_rf_tag/error_o_rf_tag"
+    ],
+    "fenetre_tir": {
+        "buffer_overflow": [
+            [
+                137140,
+                137380
+            ]
+        ],
+        "secretFunction": [
+            [
+                2099100,
+                2099420
+            ]
+        ],
+        "propagationTagV2": [
+            [
+                33300,
+                33460
+            ]
+        ]
+    },
+    "cycle_ref": 100,
+    "cpu_period": 40,
+    "batch_sim": {
+        "buffer_overflow": 400,
+        "secretFunction": 220,
+        "propagationTagV2": 300
+    },
+    "multi_res_files": {
+        "buffer_overflow": 2,
+        "secretFunction": 5,
+        "propagationTagV2": 2
+    }
+}

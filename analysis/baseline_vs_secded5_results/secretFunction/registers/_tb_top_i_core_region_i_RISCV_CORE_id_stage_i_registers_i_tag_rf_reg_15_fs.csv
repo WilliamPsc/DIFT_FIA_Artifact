@@ -1,0 +1,7 @@
+register,use_case,configuration,fault_model,successes,total_simulations,success_rate_percent
+/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/rf_reg[15],secretFunction,Baseline,single_bitflip_spatial,271,1008,26.884921
+/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/rf_reg[15],secretFunction,Baseline,multi_bitflip_reg,2,16,12.500000
+/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/rf_reg[15],secretFunction,Baseline,multi_bitflip_reg_multi,322,2464,13.068182
+/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/rf_reg[15],secretFunction,SECDED Strategy 5,single_bitflip_spatial,0,2232,0.000000
+/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/rf_reg[15],secretFunction,SECDED Strategy 5,multi_bitflip_reg,0,16,0.000000
+/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/rf_reg[15],secretFunction,SECDED Strategy 5,multi_bitflip_reg_multi,66,9216,0.716146

@@ -1,0 +1,4 @@
+register,use_case,configuration,fault_model,successes,total_simulations,success_rate_percent
+/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/secded_encoder_rf_tag/hc_o_rf_tag,buffer_overflow,SECDED Strategy 5,single_bitflip_spatial,0,9954,0.000000
+/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/secded_encoder_rf_tag/hc_o_rf_tag,buffer_overflow,SECDED Strategy 5,multi_bitflip_reg,0,384,0.000000
+/tb/top_i/core_region_i/RISCV_CORE/id_stage_i/registers_i_tag/secded_encoder_rf_tag/hc_o_rf_tag,buffer_overflow,SECDED Strategy 5,multi_bitflip_reg_multi,48,197376,0.024319

@@ -1,0 +1,13 @@
+register,use_case,protection,strategy,fault_model,successes,total_simulations,success_rate_percent
+use_store_ops_ex_o/hc_o,secretFunction,hamming,3,multi_bitflip_reg,1,32,3.125000
+use_store_ops_ex_o/hc_o,secretFunction,hamming,3,multi_bitflip_reg_multi,507,12544,4.041773
+use_store_ops_ex_o/hc_o,secretFunction,hamming,3,single_bitflip_spatial,3,3032,0.098945
+use_store_ops_ex_o/hc_o,secretFunction,hamming,4,multi_bitflip_reg,1,32,3.125000
+use_store_ops_ex_o/hc_o,secretFunction,hamming,4,multi_bitflip_reg_multi,567,14464,3.920077
+use_store_ops_ex_o/hc_o,secretFunction,hamming,4,single_bitflip_spatial,3,3624,0.082781
+use_store_ops_ex_o/hc_o,secretFunction,secded,3,multi_bitflip_reg,0,32,0.000000
+use_store_ops_ex_o/hc_o,secretFunction,secded,3,multi_bitflip_reg_multi,44,14080,0.312500
+use_store_ops_ex_o/hc_o,secretFunction,secded,3,single_bitflip_spatial,0,3416,0.000000
+use_store_ops_ex_o/hc_o,secretFunction,secded,4,multi_bitflip_reg,0,32,0.000000
+use_store_ops_ex_o/hc_o,secretFunction,secded,4,multi_bitflip_reg_multi,29,16896,0.171638
+use_store_ops_ex_o/hc_o,secretFunction,secded,4,single_bitflip_spatial,0,4232,0.000000

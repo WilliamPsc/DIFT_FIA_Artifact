@@ -1,0 +1,4 @@
+register,use_case,protection,strategy,fault_model,successes,total_simulations,success_rate_percent
+lsu_group5/sd_o,secretFunction,secded,5,multi_bitflip_reg,0,16,0.000000
+lsu_group5/sd_o,secretFunction,secded,5,multi_bitflip_reg_multi,4,9216,0.043403
+lsu_group5/sd_o,secretFunction,secded,5,single_bitflip_spatial,0,2232,0.000000

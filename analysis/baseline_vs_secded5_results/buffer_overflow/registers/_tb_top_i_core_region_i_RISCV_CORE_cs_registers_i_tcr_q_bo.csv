@@ -1,0 +1,3 @@
+register,use_case,configuration,fault_model,successes,total_simulations,success_rate_percent
+/tb/top_i/core_region_i/RISCV_CORE/cs_registers_i/tcr_q,buffer_overflow,Baseline,single_bitflip_spatial,788,21216,3.714178
+/tb/top_i/core_region_i/RISCV_CORE/cs_registers_i/tcr_q,buffer_overflow,SECDED Strategy 5,single_bitflip_spatial,0,50592,0.000000

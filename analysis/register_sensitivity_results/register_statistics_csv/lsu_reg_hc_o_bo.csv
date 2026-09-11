@@ -1,0 +1,4 @@
+register,use_case,protection,strategy,fault_model,successes,total_simulations,success_rate_percent
+lsu_reg/hc_o,buffer_overflow,hamming,2,multi_bitflip_reg,0,96,0.000000
+lsu_reg/hc_o,buffer_overflow,hamming,2,multi_bitflip_reg_multi,224,31488,0.711382
+lsu_reg/hc_o,buffer_overflow,hamming,2,single_bitflip_spatial,0,3708,0.000000

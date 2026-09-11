@@ -1,0 +1,13 @@
+register,use_case,protection,strategy,fault_model,successes,total_simulations,success_rate_percent
+tcr_q,buffer_overflow,hamming,1,single_bitflip_spatial,195,26016,0.749539
+tcr_q,buffer_overflow,hamming,2,single_bitflip_spatial,105,26976,0.389235
+tcr_q,buffer_overflow,hamming,3,single_bitflip_spatial,105,33504,0.313395
+tcr_q,buffer_overflow,hamming,4,single_bitflip_spatial,10,40608,0.024626
+tcr_q,buffer_overflow,hamming,5,single_bitflip_spatial,14,43104,0.032480
+tcr_q,buffer_overflow,secded,1,single_bitflip_spatial,0,26976,0.000000
+tcr_q,buffer_overflow,secded,2,single_bitflip_spatial,0,28320,0.000000
+tcr_q,buffer_overflow,secded,3,single_bitflip_spatial,0,38112,0.000000
+tcr_q,buffer_overflow,secded,4,single_bitflip_spatial,0,47904,0.000000
+tcr_q,buffer_overflow,secded,5,single_bitflip_spatial,0,50592,0.000000
+tcr_q,buffer_overflow,simple_parity,1,single_bitflip_spatial,0,22176,0.000000
+tcr_q,buffer_overflow,wop,1,single_bitflip_spatial,788,21216,3.714178

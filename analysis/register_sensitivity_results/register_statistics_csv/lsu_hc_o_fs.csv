@@ -1,0 +1,4 @@
+register,use_case,protection,strategy,fault_model,successes,total_simulations,success_rate_percent
+lsu/hc_o,secretFunction,secded,2,multi_bitflip_reg,0,128,0.000000
+lsu/hc_o,secretFunction,secded,2,multi_bitflip_reg_multi,162,43776,0.370066
+lsu/hc_o,secretFunction,secded,2,single_bitflip_spatial,0,5168,0.000000

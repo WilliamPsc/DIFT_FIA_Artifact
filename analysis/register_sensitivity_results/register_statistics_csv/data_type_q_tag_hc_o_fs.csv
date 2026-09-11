@@ -1,0 +1,13 @@
+register,use_case,protection,strategy,fault_model,successes,total_simulations,success_rate_percent
+data_type_q_tag/hc_o,secretFunction,hamming,3,multi_bitflip_reg,0,64,0.000000
+data_type_q_tag/hc_o,secretFunction,hamming,3,multi_bitflip_reg_multi,248,24832,0.998711
+data_type_q_tag/hc_o,secretFunction,hamming,3,single_bitflip_spatial,0,4536,0.000000
+data_type_q_tag/hc_o,secretFunction,hamming,4,multi_bitflip_reg,0,64,0.000000
+data_type_q_tag/hc_o,secretFunction,hamming,4,multi_bitflip_reg_multi,248,28672,0.864955
+data_type_q_tag/hc_o,secretFunction,hamming,4,single_bitflip_spatial,0,5424,0.000000
+data_type_q_tag/hc_o,secretFunction,secded,3,multi_bitflip_reg,0,64,0.000000
+data_type_q_tag/hc_o,secretFunction,secded,3,multi_bitflip_reg_multi,70,27904,0.250860
+data_type_q_tag/hc_o,secretFunction,secded,3,single_bitflip_spatial,0,5112,0.000000
+data_type_q_tag/hc_o,secretFunction,secded,4,multi_bitflip_reg,0,64,0.000000
+data_type_q_tag/hc_o,secretFunction,secded,4,multi_bitflip_reg_multi,45,33536,0.134184
+data_type_q_tag/hc_o,secretFunction,secded,4,single_bitflip_spatial,0,6336,0.000000
