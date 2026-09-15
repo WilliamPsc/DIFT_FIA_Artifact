@@ -1,7 +1,0 @@
-register,use_case,configuration,fault_model,successes,total_simulations,success_rate_percent
-/tb/top_i/core_region_i/RISCV_CORE/if_stage_i/pc_if_o_tag,buffer_overflow,Baseline,single_bitflip_spatial,122,756,16.137566
-/tb/top_i/core_region_i/RISCV_CORE/if_stage_i/pc_if_o_tag,buffer_overflow,Baseline,multi_bitflip_reg,1,12,8.333333
-/tb/top_i/core_region_i/RISCV_CORE/if_stage_i/pc_if_o_tag,buffer_overflow,Baseline,multi_bitflip_reg_multi,156,1848,8.441558
-/tb/top_i/core_region_i/RISCV_CORE/if_stage_i/pc_if_o_tag,buffer_overflow,SECDED Strategy 5,single_bitflip_spatial,0,1674,0.000000
-/tb/top_i/core_region_i/RISCV_CORE/if_stage_i/pc_if_o_tag,buffer_overflow,SECDED Strategy 5,multi_bitflip_reg,0,12,0.000000
-/tb/top_i/core_region_i/RISCV_CORE/if_stage_i/pc_if_o_tag,buffer_overflow,SECDED Strategy 5,multi_bitflip_reg_multi,4,6912,0.057870

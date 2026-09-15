@@ -1,7 +1,0 @@
-register,use_case,configuration,fault_model,successes,total_simulations,success_rate_percent
-/tb/top_i/core_region_i/RISCV_CORE/load_store_unit_i/rdata_offset_q_tag,secretFunction,Baseline,single_bitflip_spatial,58,2008,2.888446
-/tb/top_i/core_region_i/RISCV_CORE/load_store_unit_i/rdata_offset_q_tag,secretFunction,Baseline,multi_bitflip_reg,0,32,0.000000
-/tb/top_i/core_region_i/RISCV_CORE/load_store_unit_i/rdata_offset_q_tag,secretFunction,Baseline,multi_bitflip_reg_multi,56,4864,1.151316
-/tb/top_i/core_region_i/RISCV_CORE/load_store_unit_i/rdata_offset_q_tag,secretFunction,SECDED Strategy 5,single_bitflip_spatial,0,4456,0.000000
-/tb/top_i/core_region_i/RISCV_CORE/load_store_unit_i/rdata_offset_q_tag,secretFunction,SECDED Strategy 5,multi_bitflip_reg,0,32,0.000000
-/tb/top_i/core_region_i/RISCV_CORE/load_store_unit_i/rdata_offset_q_tag,secretFunction,SECDED Strategy 5,multi_bitflip_reg_multi,8,18368,0.043554

@@ -3,57 +3,39 @@ from __future__ import annotations
 import csv
 import json
 import re
-
 from collections import Counter, defaultdict
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 import matplotlib.pyplot as plt
 
 
-# ============================================================
-# CONFIGURATION
-# ============================================================
+# ============================================================================
+# Configuration
+# ============================================================================
 
-# Root directory containing all simulation campaign folders
 RESULTS_ROOT = Path("results_simulations")
-
-# Output directory
 OUTPUT_ROOT = Path("baseline_vs_secded5_results")
-
-# Optional register alias file
 REGISTER_ALIASES_FILE = Path("register_aliases.csv")
 
-# status_end value corresponding to a successful attack
 SUCCESS_STATUS = 4
-
-# Number of registers displayed in the figures
 TOP_N_REGISTERS = 15
-
-
-# ------------------------------------------------------------
-# Use cases
-# ------------------------------------------------------------
 
 USE_CASE_NAMES = {
     "buffer_overflow": "Buffer Overflow",
     "secretFunction": "Format String",
 }
 
-USE_CASE_SUFFIXES = {
-    "buffer_overflow": "bo",
-    "secretFunction": "fs",
+USE_CASE_OUTPUT_NAMES = {
+    "buffer_overflow": "buffer_overflow",
+    "secretFunction": "format_string",
 }
 
-
-# ------------------------------------------------------------
-# Fault models
-# ------------------------------------------------------------
-
 FAULT_MODEL_NAMES = {
-    "single_bitflip_spatial": "Single-bit / two registers",
-    "multi_bitflip_reg": "Multi-bit / one register",
-    "multi_bitflip_reg_multi": "Multi-bit / two registers",
+    "single_bitflip_spatial": "Single-bit / \ntwo registers",
+    "multi_bitflip_reg": "Multi-bit / \none register",
+    "multi_bitflip_reg_multi": "Multi-bit / \ntwo registers",
 }
 
 FAULT_MODEL_ORDER = [
@@ -62,142 +44,194 @@ FAULT_MODEL_ORDER = [
     "multi_bitflip_reg_multi",
 ]
 
-
-# ------------------------------------------------------------
-# Configurations kept for this analysis
-# ------------------------------------------------------------
-
 BASELINE_NAME = "Baseline"
-SECDED5_NAME = "SECDED Strategy 5"
+SECDED5_NAME = "SECDED 5"
 
 CONFIGURATION_ORDER = [
     BASELINE_NAME,
     SECDED5_NAME,
 ]
 
+RANKING_CONFIGURATION = BASELINE_NAME
+# RANKING_CONFIGURATION = SECDED5_NAME
 
-# ============================================================
-# DATA STRUCTURES
-# ============================================================
 
-@dataclass
+# Metric used for the bars:
+#
+# "rate"  -> successful simulations / simulations targeting the register
+# "count" -> raw number of successful simulations
+#
+METRIC = "rate"
+
+
+# ============================================================================
+# Data structures
+# ============================================================================
+
+@dataclass(frozen=True)
 class CampaignMetadata:
     use_case: str
     protection: str
-    strategy: int | None
+    strategy: int
     fault_model: str
+    suffix: int
     folder_name: str
 
 
 @dataclass
 class Statistics:
-    total_simulations: int
-    successes: int
-    register_total: Counter
-    register_success: Counter
+    register_total: Counter[str]
+    register_success: Counter[str]
+
+    @classmethod
+    def create(cls) -> "Statistics":
+        return cls(
+            register_total=Counter(),
+            register_success=Counter(),
+        )
+
+    def merge(self, other: "Statistics") -> None:
+        self.register_total.update(other.register_total)
+        self.register_success.update(other.register_success)
 
 
-# ============================================================
-# SMALL UTILITIES
-# ============================================================
+# ============================================================================
+# Campaign parsing
+# ============================================================================
+def parse_campaign_folder(
+    folder: Path,
+    use_case: str,
+) -> CampaignMetadata | None:
 
-def safe_filename(name: str) -> str:
-    """
-    Convert a string into a filename-safe representation.
-    """
+    prefix = f"{use_case}_"
 
-    name = name.replace("/", "_")
-    name = name.replace("\\", "_")
-    name = name.replace("[", "_")
-    name = name.replace("]", "")
-    name = name.replace(" ", "_")
+    if not folder.name.startswith(prefix):
+        return None
 
-    return re.sub(r"[^A-Za-z0-9_.-]", "_", name)
+    remaining_name = folder.name[len(prefix):]
 
+    match = re.match(
+        r"^(?P<protection>.+?)_"
+        r"(?P<strategy>\d+)_"
+        r"(?P<fault_model>.+)_"
+        r"(?P<suffix>\d+)$",
+        remaining_name,
+    )
 
-def format_use_case_name(use_case: str) -> str:
-    return USE_CASE_NAMES.get(use_case, use_case)
+    if match is None:
+        return None
 
-
-def format_use_case_suffix(use_case: str) -> str:
-    return USE_CASE_SUFFIXES.get(
-        use_case,
-        safe_filename(use_case),
+    return CampaignMetadata(
+        use_case=use_case,
+        protection=match.group("protection"),
+        strategy=int(match.group("strategy")),
+        fault_model=match.group("fault_model"),
+        suffix=int(match.group("suffix")),
+        folder_name=folder.name,
     )
 
 
-def format_fault_model_name(fault_model: str) -> str:
-    return FAULT_MODEL_NAMES.get(
-        fault_model,
-        fault_model.replace("_", " "),
-    )
+def get_configuration(
+    metadata: CampaignMetadata,
+) -> str | None:
+    """
+    Keep only:
+      - baseline: wop strategy 1
+      - SECDED strategy 5
+    """
+
+    protection = metadata.protection.lower()
+
+    if protection == "wop" and metadata.strategy == 1:
+        return BASELINE_NAME
+
+    if protection == "secded" and metadata.strategy == 5:
+        return SECDED5_NAME
+
+    return None
 
 
-# ============================================================
-# REGISTER ALIASES
-# ============================================================
+# ============================================================================
+# Register aliases
+# ============================================================================
+def simplify_register_name(register_path: str) -> str:
+    clean_path = register_path.strip("/")
+
+    parts = [
+        part
+        for part in clean_path.split("/")
+        if part
+    ]
+
+    if len(parts) <= 1:
+        return parts[0] if parts else clean_path
+
+    return "/".join(parts[-2:])
+
 
 def load_register_aliases(
-    csv_path: Path,
-) -> dict[tuple[int | None, str, str], str]:
-    """
-    Load register aliases.
+    path: Path,
+) -> dict[tuple[int, str, str], str]:
 
-    Expected CSV columns:
-        strategy, protection, rtl_name, logical_name
+    aliases: dict[tuple[int, str, str], str] = {}
 
-    An empty logical_name means that the original RTL name is kept.
-    """
-
-    aliases = {}
-
-    if not csv_path.exists():
-        print(
-            f"[INFO] Alias file not found: {csv_path}. "
-            f"Original register names will be used."
+    if not path.is_file():
+        raise FileNotFoundError(
+            f"Alias file not found: {path.resolve()}"
         )
-        return aliases
 
-    with csv_path.open(
+    with path.open(
         "r",
-        encoding="utf-8",
+        encoding="utf-8-sig",
         newline="",
-    ) as csv_file:
+    ) as file:
 
-        reader = csv.DictReader(csv_file)
+        reader = csv.DictReader(file)
 
-        for row in reader:
+        expected_columns = {
+            "strategy",
+            "protection",
+            "rtl_name",
+            "logical_name",
+        }
 
-            rtl_name = row.get(
-                "rtl_name",
-                "",
-            ).strip()
+        actual_columns = set(reader.fieldnames or [])
 
-            logical_name = row.get(
-                "logical_name",
-                "",
-            ).strip()
+        missing = expected_columns - actual_columns
 
-            protection = row.get(
-                "protection",
-                "",
-            ).strip().lower()
+        if missing:
+            raise ValueError(
+                "Missing columns in register_aliases.csv: "
+                + ", ".join(sorted(missing))
+            )
 
-            strategy_text = row.get(
-                "strategy",
-                "",
-            ).strip()
+        for line_number, row in enumerate(reader, start=2):
 
-            if not rtl_name:
+            strategy_text = row["strategy"].strip()
+            protection = row["protection"].strip().lower()
+            rtl_name = row["rtl_name"].strip()
+            logical_name = row["logical_name"].strip()
+
+            if not strategy_text or not protection or not rtl_name:
+                print(
+                    f"[Alias ignored line {line_number}] "
+                    "missing strategy/protection/register."
+                )
                 continue
 
-            strategy = None
+            try:
+                strategy = int(strategy_text)
 
-            if strategy_text:
-                try:
-                    strategy = int(strategy_text)
-                except ValueError:
-                    pass
+            except ValueError:
+                print(
+                    f"[Alias ignored line {line_number}] "
+                    f"invalid strategy: {strategy_text}"
+                )
+                continue
+
+            # Empty logical name = keep original RTL name
+            if not logical_name:
+                logical_name = rtl_name
 
             aliases[
                 (
@@ -205,15 +239,7 @@ def load_register_aliases(
                     protection,
                     rtl_name,
                 )
-            ] = (
-                logical_name
-                if logical_name
-                else rtl_name
-            )
-
-    print(
-        f"[INFO] Loaded {len(aliases)} register aliases."
-    )
+            ] = logical_name
 
     return aliases
 
@@ -231,1494 +257,783 @@ def apply_register_alias(
         rtl_name,
     )
 
-    logical_name = aliases.get(
-        key,
-        rtl_name,
+    return aliases.get(key, rtl_name)
+
+
+# ============================================================================
+# JSON analysis
+# ============================================================================
+def simulation_sort_key(
+    item: tuple[str, Any],
+) -> int:
+
+    match = re.fullmatch(
+        r"simulation_(\d+)",
+        item[0],
     )
 
-    return logical_name
+    if match is None:
+        return -1
 
+    return int(match.group(1))
 
-# ============================================================
-# CAMPAIGN FOLDER PARSING
-# ============================================================
-
-def identify_use_case(folder_name: str) -> str | None:
-
-    if folder_name.startswith("buffer_overflow_"):
-        return "buffer_overflow"
-
-    if folder_name.startswith("secretFunction_"):
-        return "secretFunction"
-
-    return None
-
-
-def identify_fault_model(folder_name: str) -> str | None:
-
-    # Order matters because multi_bitflip_reg is contained
-    # in multi_bitflip_reg_multi.
-    for fault_model in [
-        "multi_bitflip_reg_multi",
-        "single_bitflip_spatial",
-        "multi_bitflip_reg",
-    ]:
-
-        if fault_model in folder_name:
-            return fault_model
-
-    return None
-
-
-def parse_campaign_folder(
-    folder: Path,
-) -> CampaignMetadata | None:
-
-    folder_name = folder.name
-
-    use_case = identify_use_case(folder_name)
-    fault_model = identify_fault_model(folder_name)
-
-    if use_case is None or fault_model is None:
-        return None
-
-    lower_name = folder_name.lower()
-
-    # Baseline / without protection
-    if re.search(r"_wop_\d+_", lower_name):
-        match = re.search(r"_wop_(\d+)_", lower_name)
-        strategy = int(match.group(1)) if match else None
-
-        return CampaignMetadata(
-            use_case=use_case,
-            protection="wop",
-            strategy=strategy,
-            fault_model=fault_model,
-            folder_name=folder_name,
-        )
-
-    # SECDED Strategy 5
-    if re.search(r"_secded_5_", lower_name):
-
-        return CampaignMetadata(
-            use_case=use_case,
-            protection="secded",
-            strategy=5,
-            fault_model=fault_model,
-            folder_name=folder_name,
-        )
-
-    # Ignore every other campaign
-    return None
-
-# ============================================================
-# REGISTER EXTRACTION
-# ============================================================
 
 def extract_faulted_registers(
-    simulation: dict,
-    metadata: CampaignMetadata,
-    aliases: dict,
+    simulation: dict[str, Any],
+    strategy: int,
+    protection: str,
+    aliases: dict[tuple[int, str, str], str],
 ) -> list[str]:
 
-    registers = []
+    indexed_registers: list[tuple[int, str]] = []
 
-    # --------------------------------------------------------
-    # Single field
-    # --------------------------------------------------------
+    def prepare(register_path: str) -> str:
 
-    register = simulation.get(
-        "faulted_register"
-    )
+        rtl_name = simplify_register_name(register_path)
 
-    if register:
+        return apply_register_alias(
+            rtl_name=rtl_name,
+            strategy=strategy,
+            protection=protection,
+            aliases=aliases,
+        )
 
-        registers.append(
-            apply_register_alias(
-                str(register),
-                metadata.strategy,
-                metadata.protection,
-                aliases,
+    # Single register format
+    single_register = simulation.get("faulted_register")
+
+    if isinstance(single_register, str):
+        indexed_registers.append(
+            (
+                0,
+                prepare(single_register),
             )
         )
 
-    # --------------------------------------------------------
-    # Indexed fields:
-    # faulted_register_0, faulted_register_1, ...
-    # --------------------------------------------------------
-
-    indexed_registers = []
+    # Multiple registers format
+    pattern = re.compile(
+        r"^faulted_register_(\d+)$"
+    )
 
     for key, value in simulation.items():
 
-        match = re.fullmatch(
-            r"faulted_register_(\d+)",
-            key,
-        )
+        match = pattern.fullmatch(key)
 
-        if (
-            match
-            and value is not None
-            and value != ""
-        ):
+        if match is None:
+            continue
 
-            indexed_registers.append(
-                (
-                    int(match.group(1)),
-                    str(value),
-                )
+        if not isinstance(value, str):
+            continue
+
+        indexed_registers.append(
+            (
+                int(match.group(1)),
+                prepare(value),
             )
+        )
 
     indexed_registers.sort(
         key=lambda item: item[0]
     )
 
+    # Avoid counting the same logical register twice
+    # in the same simulation.
+    unique_registers: list[str] = []
+    seen: set[str] = set()
+
     for _, register in indexed_registers:
 
-        registers.append(
-            apply_register_alias(
-                register,
-                metadata.strategy,
-                metadata.protection,
-                aliases,
-            )
-        )
+        if register in seen:
+            continue
 
-    # Remove duplicate names within the same simulation.
-    #
-    # Example:
-    # if the same register appears twice, the simulation still
-    # counts only once as a simulation targeting this register.
-    return list(dict.fromkeys(registers))
+        seen.add(register)
+        unique_registers.append(register)
 
+    return unique_registers
 
-# ============================================================
-# JSON ANALYSIS
-# ============================================================
 
 def analyse_json_file(
     json_path: Path,
-    metadata: CampaignMetadata,
-    aliases: dict,
+    strategy: int,
+    protection: str,
+    aliases: dict[tuple[int, str, str], str],
 ) -> Statistics:
 
-    statistics = Statistics(
-        total_simulations=0,
-        successes=0,
-        register_total=Counter(),
-        register_success=Counter(),
-    )
+    statistics = Statistics.create()
 
     try:
-
         with json_path.open(
             "r",
             encoding="utf-8",
-        ) as json_file:
+        ) as file:
+            content = json.load(file)
 
-            data = json.load(json_file)
-
-    except (
-        json.JSONDecodeError,
-        OSError,
-    ) as error:
-
+    except (OSError, json.JSONDecodeError) as error:
         print(
-            f"[WARNING] Cannot read {json_path}: {error}"
+            f"[Cannot read JSON] {json_path}: {error}"
         )
-
         return statistics
 
-    # JSON can either directly contain simulations
-    # or contain them under a "simulations" field.
-    if isinstance(data, dict):
-
-        if "simulations" in data:
-            simulations = data["simulations"]
-        else:
-            simulations = list(
-                data.values()
-            )
-
-    elif isinstance(data, list):
-
-        simulations = data
-
-    else:
+    if not isinstance(content, dict):
         return statistics
 
-    for simulation_index, simulation in enumerate(
-        simulations
-    ):
+    simulations = sorted(
+        (
+            (key, value)
+            for key, value in content.items()
+            if key.startswith("simulation_")
+        ),
+        key=simulation_sort_key,
+    )
 
-        if not isinstance(
-            simulation,
-            dict,
-        ):
+    for simulation_name, simulation in simulations:
+
+        # Reference simulation
+        if simulation_name == "simulation_0":
             continue
 
-        # simulation_0 / first simulation is the reference
-        # execution and must not be counted as a fault injection.
-        #
-        # If simulation IDs are present, use them.
-        simulation_id = simulation.get(
-            "simulation_id",
-            simulation.get(
-                "simulation",
-                simulation.get(
-                    "id"
-                ),
-            ),
-        )
-
-        if simulation_id in [
-            0,
-            "0",
-            "simulation_0",
-        ]:
-            continue
-
-        # If no explicit ID exists, preserve previous behaviour:
-        # first entry is the reference simulation.
-        if (
-            simulation_id is None
-            and simulation_index == 0
-        ):
+        if not isinstance(simulation, dict):
             continue
 
         registers = extract_faulted_registers(
-            simulation,
-            metadata,
-            aliases,
+            simulation=simulation,
+            strategy=strategy,
+            protection=protection,
+            aliases=aliases,
         )
 
         if not registers:
             continue
 
-        statistics.total_simulations += 1
-
-        success = (
+        is_success = (
             simulation.get("status_end")
             == SUCCESS_STATUS
         )
 
-        if success:
-            statistics.successes += 1
-
         for register in registers:
 
-            statistics.register_total[
-                register
-            ] += 1
+            statistics.register_total[register] += 1
 
-            if success:
-
-                statistics.register_success[
-                    register
-                ] += 1
+            if is_success:
+                statistics.register_success[register] += 1
 
     return statistics
 
 
-# ============================================================
-# CONFIGURATION NAME
-# ============================================================
-
-def get_configuration_name(
-    metadata: CampaignMetadata,
-) -> str:
-
-    if metadata.protection == "wop":
-        return BASELINE_NAME
-
-    if (
-        metadata.protection == "secded"
-        and metadata.strategy == 5
-    ):
-        return SECDED5_NAME
-
-    raise ValueError(
-        f"Unexpected configuration: "
-        f"{metadata.protection}, strategy {metadata.strategy}"
-    )
-
-
-# ============================================================
-# CSV EXPORT
-# ============================================================
-
-def export_use_case_csv(
-    use_case: str,
-    success_data,
-    total_data,
-    output_directory: Path,
-) -> Path:
-
-    output_directory.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
-
-    suffix = format_use_case_suffix(
+# ============================================================================
+# Complete campaign analysis
+# ============================================================================
+def analyse_campaigns():
+    """
+    stats[
         use_case
-    )
-
-    output_path = (
-        output_directory
-        / f"register_statistics_{suffix}.csv"
-    )
-
-    rows = []
-
-    for configuration in CONFIGURATION_ORDER:
-
-        for fault_model in FAULT_MODEL_ORDER:
-
-            totals = total_data[
-                use_case
-            ][
-                configuration
-            ][
-                fault_model
-            ]
-
-            successes = success_data[
-                use_case
-            ][
-                configuration
-            ][
-                fault_model
-            ]
-
-            for register in sorted(
-                totals.keys()
-            ):
-
-                total = totals.get(
-                    register,
-                    0,
-                )
-
-                if total == 0:
-                    continue
-
-                success = successes.get(
-                    register,
-                    0,
-                )
-
-                success_rate = (
-                    100.0
-                    * success
-                    / total
-                )
-
-                rows.append(
-                    {
-                        "register": register,
-                        "use_case": use_case,
-                        "configuration": configuration,
-                        "fault_model": fault_model,
-                        "successes": success,
-                        "total_simulations": total,
-                        "success_rate_percent": f"{success_rate:.6f}",
-                    }
-                )
-
-    with output_path.open(
-        "w",
-        encoding="utf-8",
-        newline="",
-    ) as csv_file:
-
-        fieldnames = [
-            "register",
-            "use_case",
-            "configuration",
-            "fault_model",
-            "successes",
-            "total_simulations",
-            "success_rate_percent",
-        ]
-
-        writer = csv.DictWriter(
-            csv_file,
-            fieldnames=fieldnames,
-        )
-
-        writer.writeheader()
-        writer.writerows(rows)
-
-    print(
-        f"[CSV] {output_path}"
-    )
-
-    return output_path
-
-
-# ============================================================
-# GLOBAL SUCCESS RATE PER REGISTER
-# ============================================================
-
-def compute_global_register_rates(
-    use_case: str,
-    success_data,
-    total_data,
-) -> dict[str, dict[str, float]]:
+    ][
+        configuration
+    ][
+        fault_model
+    ] = Statistics
     """
-    Compute one global rate per register and configuration,
-    aggregating all fault models:
-
-        total successes / total simulations
-
-    The three fault models are NOT averaged.
-    """
-
-    registers = set()
-
-    for configuration in CONFIGURATION_ORDER:
-
-        for fault_model in FAULT_MODEL_ORDER:
-
-            registers.update(
-                total_data[
-                    use_case
-                ][
-                    configuration
-                ][
-                    fault_model
-                ].keys()
-            )
-
-    rates = defaultdict(dict)
-
-    for register in registers:
-
-        for configuration in CONFIGURATION_ORDER:
-
-            total_success = 0
-            total_simulations = 0
-
-            for fault_model in FAULT_MODEL_ORDER:
-
-                total_success += (
-                    success_data[
-                        use_case
-                    ][
-                        configuration
-                    ][
-                        fault_model
-                    ].get(
-                        register,
-                        0,
-                    )
-                )
-
-                total_simulations += (
-                    total_data[
-                        use_case
-                    ][
-                        configuration
-                    ][
-                        fault_model
-                    ].get(
-                        register,
-                        0,
-                    )
-                )
-
-            if total_simulations > 0:
-
-                rates[
-                    register
-                ][
-                    configuration
-                ] = (
-                    100.0
-                    * total_success
-                    / total_simulations
-                )
-
-    return rates
-
-
-def compute_register_rates_by_fault_model(
-    use_case: str,
-    configuration: str,
-    success_data,
-    total_data,
-) -> dict[str, dict[str, float]]:
-    """
-    Returns:
-
-        register -> fault_model -> success_rate_percent
-
-    Only combinations that were actually simulated are included.
-    """
-
-    rates = defaultdict(dict)
-
-    for fault_model in FAULT_MODEL_ORDER:
-
-        success_counter = (
-            success_data
-            .get(use_case, {})
-            .get(configuration, {})
-            .get(fault_model, Counter())
-        )
-
-        total_counter = (
-            total_data
-            .get(use_case, {})
-            .get(configuration, {})
-            .get(fault_model, Counter())
-        )
-
-        all_registers = (
-            set(success_counter.keys())
-            | set(total_counter.keys())
-        )
-
-        for register in all_registers:
-
-            total = total_counter.get(register, 0)
-
-            # Important:
-            # total == 0 means "not evaluated",
-            # NOT "0% successful attacks".
-            if total == 0:
-                continue
-
-            successes = success_counter.get(register, 0)
-
-            rate = 100.0 * successes / total
-
-            rates[register][fault_model] = rate
-
-    return rates
-
-
-def compute_register_global_ranking(
-    use_case: str,
-    configuration: str,
-    success_data,
-    total_data,
-) -> dict[str, float]:
-    """
-    Computes one global sensitivity value per register.
-
-    The value is used ONLY to rank registers in the figure.
-
-    It is calculated as:
-
-        sum(successes) / sum(total simulations)
-
-    across all available fault models.
-    """
-
-    global_success = Counter()
-    global_total = Counter()
-
-    for fault_model in FAULT_MODEL_ORDER:
-
-        success_counter = (
-            success_data
-            .get(use_case, {})
-            .get(configuration, {})
-            .get(fault_model, Counter())
-        )
-
-        total_counter = (
-            total_data
-            .get(use_case, {})
-            .get(configuration, {})
-            .get(fault_model, Counter())
-        )
-
-        global_success.update(success_counter)
-        global_total.update(total_counter)
-
-    rates = {}
-
-    for register, total in global_total.items():
-
-        if total == 0:
-            continue
-
-        successes = global_success.get(register, 0)
-
-        rates[register] = (
-            100.0 * successes / total
-        )
-
-    return rates
-
-# ============================================================
-# BASELINE VS SECDED 5 FIGURE
-# ============================================================
-
-def plot_baseline_vs_secded5(
-    use_case: str,
-    success_data,
-    total_data,
-    output_directory: Path,
-    ranking_configuration: str,
-    top_n: int = TOP_N_REGISTERS,
-) -> None:
-
-    rates = compute_global_register_rates(
-        use_case,
-        success_data,
-        total_data,
-    )
-
-    # --------------------------------------------------------
-    # Keep only registers that exist in BOTH configurations.
-    #
-    # This ensures a real baseline-vs-SECDED5 comparison.
-    # --------------------------------------------------------
-
-    common_registers = {
-        register: config_rates
-        for register, config_rates in rates.items()
-        if (
-            BASELINE_NAME in config_rates
-            and SECDED5_NAME in config_rates
-        )
-    }
-
-    if not common_registers:
-
-        print(
-            f"[WARNING] No common registers found for "
-            f"{use_case}."
-        )
-        return
-
-    # --------------------------------------------------------
-    # Rank registers according to baseline vulnerability.
-    #
-    # This answers:
-    # Which registers are the most vulnerable before protection?
-    # --------------------------------------------------------
-
-    selected = sorted(
-        common_registers.items(),
-        key=lambda item: item[1][ranking_configuration],
-        reverse=True,
-    )[:top_n]
-
-    # Name used in the figure title and output filename
-    if ranking_configuration == BASELINE_NAME:
-        ranking_title = "Baseline"
-        ranking_suffix = "baseline"
-    else:
-        ranking_title = "SECDED Strategy 5"
-        ranking_suffix = "secded5"
-
-    # Reverse for horizontal plot:
-    # highest register appears at the top.
-    selected = list(
-        reversed(selected)
-    )
-
-    registers = [
-        register
-        for register, _ in selected
-    ]
-
-    baseline_rates = [
-        rate_data[BASELINE_NAME]
-        for _, rate_data in selected
-    ]
-
-    secded_rates = [
-        rate_data[SECDED5_NAME]
-        for _, rate_data in selected
-    ]
-
-    y_positions = list(
-        range(len(registers))
-    )
-
-    bar_height = 0.38
-
-    fig_height = max(
-        5,
-        len(registers) * 0.45,
-    )
-
-    fig, ax = plt.subplots(
-        figsize=(10, fig_height)
-    )
-
-    baseline_bars = ax.barh(
-        [
-            y - bar_height / 2
-            for y in y_positions
-        ],
-        baseline_rates,
-        height=bar_height,
-        label=BASELINE_NAME,
-    )
-
-    secded_bars = ax.barh(
-        [
-            y + bar_height / 2
-            for y in y_positions
-        ],
-        secded_rates,
-        height=bar_height,
-        label=SECDED5_NAME,
-    )
-
-    ax.set_yticks(
-        y_positions
-    )
-
-    ax.set_yticklabels(
-        registers
-    )
-
-    ax.set_xlabel(
-        "Successful attack rate (%)"
-    )
-
-    ax.set_title(
-        f"Register sensitivity ranked by {ranking_title} — "
-        f"{format_use_case_name(use_case)}"
-    )
-
-    ax.legend()
-
-    # --------------------------------------------------------
-    # Percentage labels
-    # --------------------------------------------------------
-
-    for bars in [
-        baseline_bars,
-        secded_bars,
-    ]:
-
-        for bar in bars:
-
-            value = bar.get_width()
-
-            if value >= 0.10:
-
-                ax.text(
-                    value,
-                    bar.get_y()
-                    + bar.get_height() / 2,
-                    f" {value:.2f}%",
-                    va="center",
-                    ha="left",
-                    fontsize=7,
-                )
-
-    ax.grid(
-        axis="x",
-        linestyle=":",
-        alpha=0.4,
-    )
-
-    output_directory.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
-
-    suffix = format_use_case_suffix(
-        use_case
-    )
-
-    png_path = (
-        output_directory
-        / f"register_success_rate_ranked_by_{ranking_suffix}_{suffix}.png"
-    )
-
-    pdf_path = (
-        output_directory
-        / f"register_success_rate_ranked_by_{ranking_suffix}_{suffix}.pdf"
-    )
-
-    fig.tight_layout()
-
-    fig.savefig(
-        png_path,
-        dpi=300,
-        bbox_inches="tight",
-    )
-
-    fig.savefig(
-        pdf_path,
-        bbox_inches="tight",
-    )
-
-    plt.close(fig)
-
-    print(
-        f"[FIGURE] {png_path}"
-    )
-
-
-def plot_register_sensitivity_by_fault_model(
-    use_case: str,
-    configuration: str,
-    success_data,
-    total_data,
-    output_directory: Path,
-    top_n: int = TOP_N_REGISTERS,
-) -> None:
-
-    # --------------------------------------------------------
-    # Detailed rates:
-    # register -> fault model -> success rate
-    # --------------------------------------------------------
-
-    rates_by_fault_model = (
-        compute_register_rates_by_fault_model(
-            use_case=use_case,
-            configuration=configuration,
-            success_data=success_data,
-            total_data=total_data,
-        )
-    )
-
-    # --------------------------------------------------------
-    # Global rate used ONLY for ranking the registers
-    # --------------------------------------------------------
-
-    ranking = compute_register_global_ranking(
-        use_case=use_case,
-        configuration=configuration,
-        success_data=success_data,
-        total_data=total_data,
-    )
-
-    if not ranking:
-        print(
-            f"[WARNING] No register data for "
-            f"{use_case} / {configuration}"
-        )
-        return
-
-    # --------------------------------------------------------
-    # Select Top N registers from THIS configuration.
-    #
-    # Therefore:
-    # - Baseline is ranked using Baseline registers
-    # - SECDED 5 is ranked using SECDED 5 registers
-    #
-    # SECDED-specific registers such as hc_o_* are preserved.
-    # --------------------------------------------------------
-
-    selected_registers = sorted(
-        ranking,
-        key=ranking.get,
-        reverse=True,
-    )[:top_n]
-
-    # Reverse because barh displays the first item at the bottom
-    selected_registers = list(
-        reversed(selected_registers)
-    )
-
-    # --------------------------------------------------------
-    # Prepare plot
-    # --------------------------------------------------------
-
-    n_registers = len(selected_registers)
-
-    figure_height = max(
-        5.0,
-        0.55 * n_registers,
-    )
-
-    fig, ax = plt.subplots(
-        figsize=(11, figure_height)
-    )
-
-    y_positions = list(
-        range(n_registers)
-    )
-
-    number_of_models = len(
-        FAULT_MODEL_ORDER
-    )
-
-    total_group_height = 0.72
-
-    bar_height = (
-        total_group_height
-        / number_of_models
-    )
-
-    # --------------------------------------------------------
-    # Draw one horizontal bar per fault model
-    # --------------------------------------------------------
-
-    for model_index, fault_model in enumerate(
-        FAULT_MODEL_ORDER
-    ):
-
-        offset = (
-            model_index
-            - (number_of_models - 1) / 2
-        ) * bar_height
-
-        positions = [
-            y + offset
-            for y in y_positions
-        ]
-
-        values = []
-
-        for register in selected_registers:
-
-            register_rates = (
-                rates_by_fault_model.get(
-                    register,
-                    {}
-                )
-            )
-
-            # NaN means:
-            # not simulated for this register/model.
-            value = register_rates.get(
-                fault_model,
-                float("nan"),
-            )
-
-            values.append(value)
-
-        bars = ax.barh(
-            positions,
-            values,
-            height=bar_height * 0.90,
-            label=format_fault_model_name(
-                fault_model
-            ),
-        )
-
-        # ----------------------------------------------------
-        # Add rate labels
-        # ----------------------------------------------------
-
-        for bar, value in zip(
-            bars,
-            values,
-        ):
-
-            # NaN = non evaluated
-            if value != value:
-                continue
-
-            if value < 0.01:
-                continue
-
-            ax.text(
-                value,
-                bar.get_y()
-                + bar.get_height() / 2,
-                f" {value:.2f}%",
-                va="center",
-                ha="left",
-                fontsize=8,
-            )
-
-    # --------------------------------------------------------
-    # Axis labels
-    # --------------------------------------------------------
-
-    ax.set_yticks(y_positions)
-
-    ax.set_yticklabels(
-        selected_registers
-    )
-
-    ax.set_xlabel(
-        "Successful attack rate (%)"
-    )
-
-    ax.set_ylabel(
-        "Faulted register"
-    )
-
-    # --------------------------------------------------------
-    # Title
-    # --------------------------------------------------------
-
-    if configuration == BASELINE_NAME:
-        configuration_title = (
-            "Baseline"
-        )
-        configuration_suffix = (
-            "baseline"
-        )
-
-    elif configuration == SECDED5_NAME:
-        configuration_title = (
-            "SECDED Strategy 5"
-        )
-        configuration_suffix = (
-            "secded5"
-        )
-
-    else:
-        configuration_title = (
-            configuration
-        )
-        configuration_suffix = (
-            safe_filename(configuration)
-        )
-
-    ax.set_title(
-        f"Register sensitivity — "
-        f"{configuration_title} — "
-        f"{format_use_case_name(use_case)}"
-    )
-
-    ax.legend(
-        title="Fault model"
-    )
-
-    ax.set_xlim(left=0)
-
-    ax.grid(
-        axis="x",
-        alpha=0.25,
-    )
-
-    fig.tight_layout()
-
-    # --------------------------------------------------------
-    # Output filenames
-    # --------------------------------------------------------
-
-    suffix = format_use_case_suffix(
-        use_case
-    )
-
-    png_path = (
-        output_directory
-        / (
-            "register_sensitivity_"
-            f"{configuration_suffix}_"
-            f"{suffix}.png"
-        )
-    )
-
-    pdf_path = (
-        output_directory
-        / (
-            "register_sensitivity_"
-            f"{configuration_suffix}_"
-            f"{suffix}.pdf"
-        )
-    )
-
-    fig.savefig(
-        png_path,
-        dpi=300,
-        bbox_inches="tight",
-    )
-
-    fig.savefig(
-        pdf_path,
-        bbox_inches="tight",
-    )
-
-    plt.close(fig)
-
-    print(
-        f"[FIGURE] {png_path}"
-    )
-    print(
-        f"[FIGURE] {pdf_path}"
-    )
-
-# ============================================================
-# OPTIONAL: ONE CSV PER REGISTER
-# ============================================================
-
-def export_one_csv_per_register(
-    use_case: str,
-    success_data,
-    total_data,
-    output_directory: Path,
-) -> None:
-
-    suffix = format_use_case_suffix(
-        use_case
-    )
-
-    output_directory.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
-
-    registers = set()
-
-    for configuration in CONFIGURATION_ORDER:
-
-        for fault_model in FAULT_MODEL_ORDER:
-
-            registers.update(
-                total_data[
-                    use_case
-                ][
-                    configuration
-                ][
-                    fault_model
-                ].keys()
-            )
-
-    for register in sorted(registers):
-
-        rows = []
-
-        for configuration in CONFIGURATION_ORDER:
-
-            for fault_model in FAULT_MODEL_ORDER:
-
-                total = (
-                    total_data[
-                        use_case
-                    ][
-                        configuration
-                    ][
-                        fault_model
-                    ].get(
-                        register,
-                        0,
-                    )
-                )
-
-                # Do not interpret a non-simulated register/model
-                # combination as 0% success.
-                if total == 0:
-                    continue
-
-                success = (
-                    success_data[
-                        use_case
-                    ][
-                        configuration
-                    ][
-                        fault_model
-                    ].get(
-                        register,
-                        0,
-                    )
-                )
-
-                rate = (
-                    100.0
-                    * success
-                    / total
-                )
-
-                rows.append(
-                    {
-                        "register": register,
-                        "use_case": use_case,
-                        "configuration": configuration,
-                        "fault_model": fault_model,
-                        "successes": success,
-                        "total_simulations": total,
-                        "success_rate_percent": f"{rate:.6f}",
-                    }
-                )
-
-        if not rows:
-            continue
-
-        filename = (
-            f"{safe_filename(register)}"
-            f"_{suffix}.csv"
-        )
-
-        output_path = (
-            output_directory
-            / filename
-        )
-
-        with output_path.open(
-            "w",
-            encoding="utf-8",
-            newline="",
-        ) as csv_file:
-
-            fieldnames = [
-                "register",
-                "use_case",
-                "configuration",
-                "fault_model",
-                "successes",
-                "total_simulations",
-                "success_rate_percent",
-            ]
-
-            writer = csv.DictWriter(
-                csv_file,
-                fieldnames=fieldnames,
-            )
-
-            writer.writeheader()
-            writer.writerows(rows)
-
-
-# ============================================================
-# MAIN
-# ============================================================
-
-def main() -> None:
-
-    print(
-        "=============================================="
-    )
-    print(
-        " Baseline vs SECDED Strategy 5 analysis"
-    )
-    print(
-        "=============================================="
-    )
 
     aliases = load_register_aliases(
         REGISTER_ALIASES_FILE
     )
 
-    print(
-        f"[ALIASES] {len(aliases)} aliases loaded"
-    )
+    print(f"Aliases loaded: {len(aliases)}")
+    print()
 
-    # Structure:
-    #
-    # use_case
-    #   -> configuration
-    #       -> fault_model
-    #           -> register : count
-
-    register_success = defaultdict(
+    stats = defaultdict(
         lambda: defaultdict(
             lambda: defaultdict(
-                Counter
+                Statistics.create
             )
         )
     )
-
-    register_total = defaultdict(
-        lambda: defaultdict(
-            lambda: defaultdict(
-                Counter
-            )
-        )
-    )
-
-    analysed_campaigns = 0
-    analysed_files = 0
-
-    for use_case_folder in sorted(
-        RESULTS_ROOT.iterdir()
-    ):
-
-        if not use_case_folder.is_dir():
-            continue
-
-        if use_case_folder.name not in USE_CASE_NAMES:
-            continue
-
-        print(
-            f"\n[USE CASE] {use_case_folder.name}"
-        )
-
-        for campaign_folder in sorted(
-            use_case_folder.iterdir()
-        ):
-
-            if not campaign_folder.is_dir():
-                continue
-
-            metadata = parse_campaign_folder(
-                campaign_folder
-            )
-
-            # Ignore every campaign except baseline
-            # and SECDED Strategy 5
-            if metadata is None:
-                continue
-
-            configuration = get_configuration_name(
-                metadata
-            )
-
-            print(
-                f"\n[CAMPAIGN] "
-                f"{campaign_folder.name}"
-            )
-
-            print(
-                f"           use case      = "
-                f"{metadata.use_case}"
-            )
-
-            print(
-                f"           configuration = "
-                f"{configuration}"
-            )
-
-            print(
-                f"           fault model   = "
-                f"{metadata.fault_model}"
-            )
-
-            analysed_campaigns += 1
-
-            json_files = sorted(
-                campaign_folder.glob("*.json")
-            )
-
-            print(
-                f"           JSON files    = "
-                f"{len(json_files)}"
-            )
-
-            for json_path in json_files:
-
-                statistics = analyse_json_file(
-                    json_path,
-                    metadata,
-                    aliases,
-                )
-
-                register_success[
-                    metadata.use_case
-                ][
-                    configuration
-                ][
-                    metadata.fault_model
-                ].update(
-                    statistics.register_success
-                )
-
-                register_total[
-                    metadata.use_case
-                ][
-                    configuration
-                ][
-                    metadata.fault_model
-                ].update(
-                    statistics.register_total
-                )
-
-                analysed_files += 1
-
-    # --------------------------------------------------------
-    # Outputs
-    # --------------------------------------------------------
-    print("\n===== SECDED 5 REGISTER CHECK =====")
-    for use_case in USE_CASE_NAMES:
-
-        print(
-            f"\n[{format_use_case_name(use_case)}]"
-        )
-
-        registers = set()
-
-        for fault_model in FAULT_MODEL_ORDER:
-
-            registers.update(
-                register_total[
-                    use_case
-                ][
-                    SECDED5_NAME
-                ][
-                    fault_model
-                ].keys()
-            )
-
-        hamming_registers = sorted(
-            register
-            for register in registers
-            if (
-                "hc_" in register.lower()
-                or "hamming" in register.lower()
-            )
-        )
-
-        print(
-            f"SECDED 5 registers found: "
-            f"{len(registers)}"
-        )
-
-        print(
-            f"Hamming registers found: "
-            f"{len(hamming_registers)}"
-        )
-
-        for register in hamming_registers:
-            print(
-                f"    {register}"
-            )
 
     for use_case in USE_CASE_NAMES:
 
         use_case_directory = (
-            OUTPUT_ROOT
-            / safe_filename(use_case)
+            RESULTS_ROOT / use_case
         )
 
-        # One complete CSV for the use case
-        export_use_case_csv(
+        if not use_case_directory.is_dir():
+            print(
+                f"[Missing use case] "
+                f"{use_case_directory}"
+            )
+            continue
+
+        for campaign_directory in sorted(
+            use_case_directory.iterdir()
+        ):
+
+            if not campaign_directory.is_dir():
+                continue
+
+            metadata = parse_campaign_folder(
+                campaign_directory,
+                use_case,
+            )
+
+            if metadata is None:
+                continue
+
+            configuration = get_configuration(
+                metadata
+            )
+
+            # Ignore all configurations except
+            # baseline and SECDED strategy 5.
+            if configuration is None:
+                continue
+
+            if (
+                metadata.fault_model
+                not in FAULT_MODEL_ORDER
+            ):
+                continue
+
+            json_files = sorted(
+                campaign_directory.rglob("*.json")
+            )
+
+            print(
+                f"[{USE_CASE_NAMES[use_case]}] "
+                f"{configuration} | "
+                f"{metadata.fault_model}: "
+                f"{len(json_files)} JSON files"
+            )
+
+            campaign_statistics = (
+                Statistics.create()
+            )
+
+            for json_path in json_files:
+
+                file_statistics = (
+                    analyse_json_file(
+                        json_path=json_path,
+                        strategy=metadata.strategy,
+                        protection=metadata.protection,
+                        aliases=aliases,
+                    )
+                )
+
+                campaign_statistics.merge(
+                    file_statistics
+                )
+
+            stats[
+                use_case
+            ][
+                configuration
+            ][
+                metadata.fault_model
+            ].merge(
+                campaign_statistics
+            )
+
+    return stats
+
+
+# ============================================================================
+# Metric
+# ============================================================================
+def get_register_value(
+    statistics: Statistics,
+    register: str,
+) -> float | None:
+    """
+    Returns None when the register was not targeted
+    in this campaign.
+
+    This is important: None = N/A, NOT 0.
+    """
+
+    total = statistics.register_total.get(
+        register,
+        0,
+    )
+
+    if total == 0:
+        return None
+
+    successes = statistics.register_success.get(
+        register,
+        0,
+    )
+
+    if METRIC == "count":
+        return float(successes)
+
+    if METRIC == "rate":
+        return 100.0 * successes / total
+
+    raise ValueError(
+        f"Unknown metric: {METRIC}"
+    )
+
+
+# ============================================================================
+# Baseline ranking
+# ============================================================================
+def get_top_registers(
+    use_case_stats,
+    ranking_configuration: str,
+) -> list[str]:
+    """
+    Select the TOP_N_REGISTERS according to one configuration.
+
+    ranking_configuration:
+        BASELINE_NAME -> most vulnerable registers before protection
+        SECDED5_NAME  -> most vulnerable registers after SECDED Strategy 5
+
+    Ranking:
+        sum(successes) / sum(targeted simulations)
+    across all available fault models.
+    """
+
+    total_by_register = Counter()
+    success_by_register = Counter()
+
+    for fault_model in FAULT_MODEL_ORDER:
+
+        statistics = use_case_stats[
+            ranking_configuration
+        ][
+            fault_model
+        ]
+
+        total_by_register.update(
+            statistics.register_total
+        )
+
+        success_by_register.update(
+            statistics.register_success
+        )
+
+    ranking = []
+
+    for register, total in total_by_register.items():
+
+        if total == 0:
+            continue
+
+        successes = success_by_register[register]
+
+        rate = successes / total
+
+        ranking.append(
+            (
+                register,
+                rate,
+                successes,
+                total,
+            )
+        )
+
+    ranking.sort(
+        key=lambda item: (
+            item[1],
+            item[2],
+            item[3],
+        ),
+        reverse=True,
+    )
+
+    return [
+        register
+        for register, _, _, _
+        in ranking[:TOP_N_REGISTERS]
+    ]
+
+# ============================================================================
+# Plot
+# ============================================================================
+def plot_use_case(
+    use_case: str,
+    use_case_stats,
+) -> None:
+
+    registers = get_top_registers(
+        use_case_stats,
+        RANKING_CONFIGURATION
+    )
+
+    if not registers:
+        print(
+            f"No registers found for "
+            f"{USE_CASE_NAMES[use_case]}"
+        )
+        return
+
+    # ----------------------------------------------------------------------
+    # Compact vertical layout
+    # ----------------------------------------------------------------------
+
+    # Distance between Baseline and SECDED 5
+    ROW_SPACING = 0.4
+
+    # Distance between two register groups
+    REGISTER_SPACING = 0.25
+
+    # Height of each horizontal bar
+    BAR_HEIGHT = 0.25
+
+    positions = {}
+    register_centers = []
+
+    current_y = 0.0
+
+    for register in registers:
+
+        baseline_y = current_y
+        secded_y = current_y + ROW_SPACING
+
+        positions[(register, BASELINE_NAME)] = baseline_y
+        positions[(register, SECDED5_NAME)] = secded_y
+
+        register_centers.append(
+            (baseline_y + secded_y) / 2
+        )
+
+        current_y += (
+            ROW_SPACING
+            + REGISTER_SPACING
+        )
+
+    # ----------------------------------------------------------------------
+    # Common X-axis maximum
+    # ----------------------------------------------------------------------
+
+    all_values = []
+
+    for fault_model in FAULT_MODEL_ORDER:
+
+        for register in registers:
+
+            for configuration in CONFIGURATION_ORDER:
+
+                value = get_register_value(
+                    use_case_stats[
+                        configuration
+                    ][
+                        fault_model
+                    ],
+                    register,
+                )
+
+                if value is not None:
+                    all_values.append(value)
+
+    maximum = max(all_values) if all_values else 1.0
+
+    if maximum <= 0:
+        maximum = 1.0
+
+    x_max = maximum * 1.08
+
+    # ----------------------------------------------------------------------
+    # Figure
+    # ----------------------------------------------------------------------
+
+    # Much more compact than before
+    figure_height = max(
+        4.5,
+        len(registers) * 0.42,
+    )
+
+    fig, axes = plt.subplots(
+        nrows=1,
+        ncols=3,
+        figsize=(12.5, figure_height),
+        sharey=True,
+    )
+
+    # Fixed colours:
+    # one colour = one configuration
+    configuration_colors = {
+        BASELINE_NAME: "tab:blue",
+        SECDED5_NAME: "tab:orange",
+    }
+
+    for column_index, fault_model in enumerate(
+        FAULT_MODEL_ORDER
+    ):
+
+        ax = axes[column_index]
+
+        for register in registers:
+
+            for configuration in CONFIGURATION_ORDER:
+
+                y = positions[
+                    (
+                        register,
+                        configuration,
+                    )
+                ]
+
+                statistics = use_case_stats[
+                    configuration
+                ][
+                    fault_model
+                ]
+
+                value = get_register_value(
+                    statistics,
+                    register,
+                )
+
+                # ----------------------------------------------------------
+                # N/A = not evaluated
+                # ----------------------------------------------------------
+
+                if value is None:
+
+                    ax.text(
+                        x_max * 0.02,
+                        y,
+                        "N/A",
+                        va="center",
+                        ha="left",
+                        fontsize=7,
+                    )
+
+                    continue
+
+                ax.barh(
+                    y,
+                    value,
+                    height=BAR_HEIGHT,
+                    color=configuration_colors[
+                        configuration
+                    ],
+                )
+
+        ax.set_title(
+            FAULT_MODEL_NAMES[fault_model],
+            fontsize=9,
+        )
+
+        ax.set_xlim(
+            0,
+            x_max,
+        )
+
+        ax.grid(
+            axis="x",
+            alpha=0.20,
+        )
+
+        ax.set_axisbelow(True)
+
+        if METRIC == "rate":
+            ax.set_xlabel(
+                "Successful injections (%)",
+                fontsize=8,
+            )
+        else:
+            ax.set_xlabel(
+                "Successful injections",
+                fontsize=8,
+            )
+
+        ax.tick_params(
+            axis="x",
+            labelsize=7,
+        )
+
+    # ----------------------------------------------------------------------
+    # Register names
+    # ----------------------------------------------------------------------
+
+    # axes[0].set_yticks(
+    #     register_centers
+    # )
+
+    # axes[0].set_yticklabels(
+    #     registers,
+    #     fontsize=7,
+    # )
+
+    # # Baseline at the top
+    # axes[0].invert_yaxis()
+
+    # ----------------------------------------------------------------------
+    # Left labels:
+    #   Register name | Configuration
+    # ----------------------------------------------------------------------
+
+    # We do not use the standard y tick labels.
+    axes[0].set_yticks([])
+
+    for register in registers:
+
+        baseline_y = positions[
+            (register, BASELINE_NAME)
+        ]
+
+        secded_y = positions[
+            (register, SECDED5_NAME)
+        ]
+
+        center_y = (
+            baseline_y + secded_y
+        ) / 2
+
+        # Register name: first column
+        axes[0].text(
+            -0.19,
+            center_y,
+            register,
+            transform=axes[0].get_yaxis_transform(),
+            ha="right",
+            va="center",
+            fontsize=7,
+            clip_on=False,
+        )
+
+        # Baseline: second column
+        axes[0].text(
+            -0.01,
+            baseline_y,
+            "Baseline",
+            transform=axes[0].get_yaxis_transform(),
+            ha="right",
+            va="center",
+            fontsize=6.5,
+            clip_on=False,
+        )
+
+        # SECDED 5: second column
+        axes[0].text(
+            -0.01,
+            secded_y,
+            "SECDED 5",
+            transform=axes[0].get_yaxis_transform(),
+            ha="right",
+            va="center",
+            fontsize=6.5,
+            clip_on=False,
+        )
+
+    # ----------------------------------------------------------------------
+    # Separators between registers
+    # ----------------------------------------------------------------------
+
+    for index in range(
+        len(registers) - 1
+    ):
+
+        current_register = registers[index]
+        next_register = registers[index + 1]
+
+        current_secded_y = positions[
+            (
+                current_register,
+                SECDED5_NAME,
+            )
+        ]
+
+        next_baseline_y = positions[
+            (
+                next_register,
+                BASELINE_NAME,
+            )
+        ]
+
+        separator = (
+            current_secded_y
+            + next_baseline_y
+        ) / 2
+        
+        GROUP_HEIGHT = ROW_SPACING + REGISTER_SPACING
+
+        for ax in axes:
+            ax.set_ylim(
+                positions[(registers[-1], BASELINE_NAME)]
+                + GROUP_HEIGHT / 2,
+                positions[(registers[0], BASELINE_NAME)]
+                - GROUP_HEIGHT / 2,
+            )
+
+    # ----------------------------------------------------------------------
+    # Layout
+    # ----------------------------------------------------------------------
+
+    fig.tight_layout()
+
+    # Extra room on the left for:
+    # register name + Baseline / SECDED 5
+    fig.subplots_adjust(
+        left=0.24,
+        wspace=0.06,
+    )
+
+    # ----------------------------------------------------------------------
+    # Save
+    # ----------------------------------------------------------------------
+
+    OUTPUT_ROOT.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    base_name = (
+        OUTPUT_ROOT
+        / (
+            "figure9_"
+            + USE_CASE_OUTPUT_NAMES[
+                use_case
+            ]
+        )
+    )
+
+    fig.savefig(
+        base_name.with_suffix(".pdf"),
+        bbox_inches="tight",
+    )
+
+    fig.savefig(
+        base_name.with_suffix(".png"),
+        dpi=300,
+        bbox_inches="tight",
+    )
+
+    plt.close(fig)
+
+    print(
+        f"Figure generated: "
+        f"{base_name.with_suffix('.pdf')}"
+    )
+
+    print(
+        f"Figure generated: "
+        f"{base_name.with_suffix('.png')}"
+    )
+
+
+# ============================================================================
+# Main
+# ============================================================================
+def main() -> None:
+
+    if not RESULTS_ROOT.is_dir():
+        raise FileNotFoundError(
+            f"Results directory not found: "
+            f"{RESULTS_ROOT.resolve()}"
+        )
+
+    stats = analyse_campaigns()
+
+    for use_case in USE_CASE_NAMES:
+
+        if use_case not in stats:
+            continue
+
+        plot_use_case(
             use_case,
-            register_success,
-            register_total,
-            use_case_directory,
+            stats[use_case],
         )
-
-        # One CSV per register
-        export_one_csv_per_register(
-            use_case,
-            register_success,
-            register_total,
-            use_case_directory
-            / "registers",
-        )
-
-        # Baseline
-        plot_register_sensitivity_by_fault_model(
-            use_case=use_case,
-            configuration=BASELINE_NAME,
-            success_data=register_success,
-            total_data=register_total,
-            output_directory=use_case_directory,
-        )
-
-        # SECDED Strategy 5
-        plot_register_sensitivity_by_fault_model(
-            use_case=use_case,
-            configuration=SECDED5_NAME,
-            success_data=register_success,
-            total_data=register_total,
-            output_directory=use_case_directory,
-        )
-
-    print()
-    print(
-        "=============================================="
-    )
-    print(
-        f"Campaigns analysed : {analysed_campaigns}"
-    )
-    print(
-        f"JSON files analysed: {analysed_files}"
-    )
-    print(
-        f"Results directory  : {OUTPUT_ROOT}"
-    )
-    print(
-        "=============================================="
-    )
 
 
 if __name__ == "__main__":
